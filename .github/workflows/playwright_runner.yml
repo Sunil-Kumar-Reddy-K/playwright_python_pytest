@@ -172,7 +172,7 @@ jobs:
           
           # Add headless flag if specified
           if [ "$HEADLESS" = "true" ]; then
-            PYTEST_CMD="$PYTEST_CMD --headed=false"
+            PYTEST_CMD="$PYTEST_CMD --headless"
           fi
           
           echo "🚀 Running command: $PYTEST_CMD"
