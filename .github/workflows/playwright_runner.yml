@@ -158,7 +158,6 @@ jobs:
         env:
           PLAYWRIGHT_BROWSER: ${{ matrix.browser }}
           HEADLESS: ${{ github.event.inputs.headless_mode || 'true' }}
-          PYTEST_HEADLESS: ${{ github.event.inputs.headless_mode || 'true' }}
         run: |
           # Determine test markers
           MARKERS="${{ github.event.inputs.test_markers || 'all' }}"
@@ -168,10 +167,6 @@ jobs:
             PYTEST_CMD="pytest tests/ -v --alluredir=allure-results --browser=${{ matrix.browser }}"
           else
             PYTEST_CMD="pytest tests/ -m $MARKERS -v --alluredir=allure-results --browser=${{ matrix.browser }}"
-          fi
-          
-          if [ "$PYTEST_HEADLESS" = "true" ]; then
-            PYTEST_CMD="$PYTEST_CMD --headless"
           fi
           
           echo "🚀 Running command: $PYTEST_CMD"
