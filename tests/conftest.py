@@ -44,22 +44,6 @@ def browser(playwright_instance, request):
     browser.close()
 
 
-# Add command line options
-def pytest_addoption(parser):
-    parser.addoption(
-        "--browser",
-        action="store",
-        default="chromium",
-        help="Browser to run tests on: chromium, firefox, webkit"
-    )
-    parser.addoption(
-        "--headed",
-        action="store_true",
-        default=False,
-        help="Run tests in headed mode"
-    )
-
-
 @pytest.fixture(scope="function")
 def page(browser):
     page = browser.new_page()
