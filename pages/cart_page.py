@@ -21,4 +21,4 @@ class CartPage:
     def proceed_to_checkout(self):
         self.page.locator("text=PROCEED TO CHECKOUT").click()
         self.page.wait_for_load_state("load")
-        # self.page.locator("text=PLACE ORDER").wait_for(state="visible")
+        self.page.locator("text=PLACE ORDER").wait_for(state="visible")

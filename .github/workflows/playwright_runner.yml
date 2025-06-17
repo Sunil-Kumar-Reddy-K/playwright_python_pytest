@@ -1,0 +1,339 @@
+name: 🎭 Playwright Tests with Allure Reports
+
+on:
+  # Manual trigger with inputs
+  workflow_dispatch:
+    inputs:
+      test_markers:
+        description: 'Test markers to run (e.g., all, ui, api, smoke, regression)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - ui
+          - api
+          - smoke
+          - regression
+          - critical
+
+      target_branch:
+        description: 'Branch to run tests against'
+        required: true
+        default: 'main'
+        type: string
+
+      run_note:
+        description: 'Note/Reason for running tests (will appear in report)'
+        required: false
+        default: 'Manual test execution'
+        type: string
+
+      browser:
+        description: 'Browser to use for UI tests'
+        required: true
+        default: 'chromium'
+        type: choice
+        options:
+          - chromium
+          - firefox
+          - webkit
+          - all
+
+      headless_mode:
+        description: 'Run tests in headless mode'
+        required: true
+        default: true
+        type: boolean
+
+      test_environment:
+        description: 'Test environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+          - dev
+
+  # Automatic triggers
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'tests/**'
+      - 'pages/**'
+      - 'api/**'
+      - 'utils/**'
+      - 'requirements.txt'
+      - 'pytest.ini'
+
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'tests/**'
+      - 'pages/**'
+      - 'api/**'
+      - 'utils/**'
+      - 'requirements.txt'
+      - 'pytest.ini'
+
+  schedule:
+    # Run smoke tests daily at 6 AM UTC
+    - cron: '0 6 * * *'
+
+env:
+  PYTHON_VERSION: '3.13.2'
+  NODE_VERSION: '18'
+
+jobs:
+  test:
+    name: 🧪 Run Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: 
+          ${{ fromJson(
+            github.event.inputs.browser == 'all' && '[["chromium", "firefox", "webkit"]]' ||
+            format('["{0}"]', github.event.inputs.browser || 'chromium')
+          ) }}
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.target_branch || github.ref }}
+          fetch-depth: 0
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: 📦 Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🎭 Install Playwright Browsers
+        run: |
+          playwright install --with-deps ${{ matrix.browser }}
+
+      - name: 🔍 Create Test Environment Info
+        run: |
+          # Create environment info for Allure
+          mkdir -p allure-results
+          cat > allure-results/environment.properties << EOF
+          Browser=${{ matrix.browser }}
+          Platform=Ubuntu Latest
+          Python.Version=${{ env.PYTHON_VERSION }}
+          Test.Environment=${{ github.event.inputs.test_environment || 'CI' }}
+          Target.Branch=${{ github.event.inputs.target_branch || github.ref_name }}
+          Test.Markers=${{ github.event.inputs.test_markers || 'auto' }}
+          Execution.Type=${{ github.event_name }}
+          Run.Note=${{ github.event.inputs.run_note || 'Automated execution' }}
+          Headless.Mode=${{ github.event.inputs.headless_mode || 'true' }}
+          Workflow.Run.ID=${{ github.run_id }}
+          Commit.SHA=${{ github.sha }}
+          Actor=${{ github.actor }}
+          Repository=${{ github.repository }}
+          EOF
+          
+          # Create executor info
+          cat > allure-results/executor.json << EOF
+          {
+            "name": "GitHub Actions",
+            "type": "github",
+            "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+            "buildOrder": ${{ github.run_number }},
+            "buildName": "Run #${{ github.run_number }}",
+            "buildUrl": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+            "reportName": "Playwright Test Report",
+            "reportUrl": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          }
+          EOF
+
+      - name: 🧪 Run Tests
+        env:
+          PLAYWRIGHT_BROWSER: ${{ matrix.browser }}
+          HEADLESS: ${{ github.event.inputs.headless_mode || 'true' }}
+        run: |
+          # Determine test markers
+          MARKERS="${{ github.event.inputs.test_markers || 'all' }}"
+          
+          # Set pytest command based on markers
+          if [ "$MARKERS" = "all" ]; then
+            PYTEST_CMD="pytest tests/ -v --alluredir=allure-results --browser=${{ matrix.browser }}"
+          else
+            PYTEST_CMD="pytest tests/ -m $MARKERS -v --alluredir=allure-results --browser=${{ matrix.browser }}"
+          fi
+          
+          # Add headless flag if specified
+          if [ "$HEADLESS" = "true" ]; then
+            PYTEST_CMD="$PYTEST_CMD --headed=false"
+          fi
+          
+          echo "🚀 Running command: $PYTEST_CMD"
+          
+          # Run tests and capture exit code
+          set +e
+          $PYTEST_CMD
+          TEST_EXIT_CODE=$?
+          set -e
+          
+          echo "TEST_EXIT_CODE=$TEST_EXIT_CODE" >> $GITHUB_ENV
+          
+          # Always continue to report generation
+          echo "✅ Test execution completed with exit code: $TEST_EXIT_CODE"
+
+      - name: 📊 Upload Allure Results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: allure-results-${{ matrix.browser }}
+          path: allure-results/
+          retention-days: 30
+
+      - name: 📸 Upload Screenshots (on failure)
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: screenshots-${{ matrix.browser }}
+          path: test-results/
+          retention-days: 7
+
+      - name: 📈 Generate Test Summary
+        if: always()
+        run: |
+          echo "## 🧪 Test Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Browser**: ${{ matrix.browser }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test Markers**: ${{ github.event.inputs.test_markers || 'auto' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target Branch**: ${{ github.event.inputs.target_branch || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ github.event.inputs.test_environment || 'CI' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run Note**: ${{ github.event.inputs.run_note || 'Automated execution' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Headless Mode**: ${{ github.event.inputs.headless_mode || 'true' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Exit Code**: $TEST_EXIT_CODE" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "$TEST_EXIT_CODE" = "0" ]; then
+            echo "✅ **Status**: All tests passed!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Status**: Some tests failed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  generate-report:
+    name: 📋 Generate Allure Report
+    runs-on: ubuntu-latest
+    needs: test
+    if: always()
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download All Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts/
+
+      - name: 🔄 Merge Allure Results
+        run: |
+          mkdir -p allure-results
+          find artifacts/ -name "allure-results-*" -type d | while read dir; do
+            if [ -d "$dir" ]; then
+              echo "Merging results from $dir"
+              cp -r "$dir"/* allure-results/ 2>/dev/null || true
+            fi
+          done
+          
+          echo "📊 Allure results summary:"
+          ls -la allure-results/
+          echo "Total files: $(find allure-results/ -type f | wc -l)"
+
+      - name: 🏗️ Setup Java (for Allure)
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: 📊 Generate Allure Report
+        uses: simple-elf/allure-report-action@v1.7
+        with:
+          allure_results: allure-results
+          allure_report: allure-report
+          gh_pages: gh-pages
+          allure_history: allure-history
+          keep_reports: 20
+
+      - name: 🌐 Deploy Report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: allure-history
+          destination_dir: reports
+
+      - name: 💬 Add Report Comment (for PRs)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const reportUrl = `https://${github.repository_owner}.github.io/${github.event.repository.name}/reports/`;
+            const runNote = github.event.inputs.run_note || 'Automated execution';
+            const testMarkers = github.event.inputs.test_markers || 'auto';
+            const browser = github.event.inputs.browser || 'chromium';
+            
+            const comment = `## 🎭 Test Results
+            
+            **Run Details:**
+            - 🏷️ **Test Markers**: ${testMarkers}
+            - 🌐 **Browser**: ${browser}
+            - 📝 **Run Note**: ${runNote}
+            - 🔗 **Allure Report**: [View Report](${reportUrl})
+            
+            **Workflow:** [${github.workflow}](${github.server_url}/${github.repository}/actions/runs/${github.run_id})
+            
+            > Report will be available at the link above once GitHub Pages deployment completes.`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: 📋 Final Summary
+        if: always()
+        run: |
+          echo "## 📊 Final Report Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Report URL**: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/reports/" >> $GITHUB_STEP_SUMMARY
+          echo "- **Test Markers Used**: ${{ github.event.inputs.test_markers || 'auto' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target Branch**: ${{ github.event.inputs.target_branch || github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Run Note**: ${{ github.event.inputs.run_note || 'Automated execution' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workflow Run**: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **Access your report**: The Allure report will be available at the URL above once GitHub Pages deployment completes (usually within 2-3 minutes)." >> $GITHUB_STEP_SUMMARY
+
+  notify:
+    name: 📢 Notifications
+    runs-on: ubuntu-latest
+    needs: [test, generate-report]
+    if: always()
+
+    steps:
+      - name: 📧 Send Notification
+        if: github.event.inputs.run_note
+        run: |
+          echo "🔔 Test execution completed"
+          echo "Run Note: ${{ github.event.inputs.run_note }}"
+          echo "Test Markers: ${{ github.event.inputs.test_markers }}"
+          echo "Report URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/reports/"
+          
+          # Here you can add integrations with Slack, Teams, email, etc.
+          # Example for Slack webhook (if SLACK_WEBHOOK_URL secret is configured):
+          # curl -X POST -H 'Content-type: application/json' \
+          #   --data '{"text":"🎭 Playwright Tests Completed\nNote: ${{ github.event.inputs.run_note }}\nReport: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/reports/"}' \
+          #   ${{ secrets.SLACK_WEBHOOK_URL }}
