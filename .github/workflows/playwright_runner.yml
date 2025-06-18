@@ -56,6 +56,11 @@ on:
           - production
           - dev
 
+      permissions:
+        contents: write
+        pull-requests: write
+        issues: write
+
   # Automatic triggers
   push:
     branches: [ main, develop ]
