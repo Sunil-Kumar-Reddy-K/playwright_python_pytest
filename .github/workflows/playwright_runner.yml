@@ -265,9 +265,14 @@ jobs:
       - name: 🌐 Deploy Report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           publish_dir: allure-history
           destination_dir: reports
+          keep_files: true
+          force_orphan: true
+          enable_jekyll: false
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
 
       - name: 💬 Add Report Comment (for PRs)
         if: github.event_name == 'pull_request'
