@@ -24,11 +24,17 @@ def browser(playwright_instance, request):
     if not browser_name:
         browser_name = os.getenv("PLAYWRIGHT_BROWSER", "chromium")
 
-    headless = request.config.getoption("--headed", default=True)
-    if headless == False:
-        headless = False
+    # Default to headless in CI environment
+    if os.getenv("CI"):
+        headless = True
     else:
-        headless = os.getenv("HEADLESS", "true").lower() == "true"
+        headless = not request.config.getoption("--headed", default=False)
+        
+    # Allow HEADLESS env var to override in non-CI environments
+    if not os.getenv("CI"):
+        headless_env = os.getenv("HEADLESS")
+        if headless_env is not None:
+            headless = headless_env.lower() == "true"
 
     # Launch browser
     if browser_name == "chromium":
