@@ -280,7 +280,7 @@ jobs:
         with:
           script: |
             try {
-              const repo = context.repo || {};
+              const repo = context.repo;
               const owner = repo.owner || context.payload.repository?.owner?.login || 'unknown';
               const repoName = repo.repo || context.payload.repository?.name || 'unknown';
               const prNumber = context.issue?.number || github.event.pull_request?.number;
@@ -291,21 +291,21 @@ jobs:
               }
             
               const reportUrl = `https://${owner}.github.io/${repoName}/reports/`;
-              const runNote = github.event.inputs?.run_note || 'Automated execution';
-              const testMarkers = github.event.inputs?.test_markers || 'auto';
-              const browser = github.event.inputs?.browser || 'chromium';
+              const runNote = context.payload.inputs?.note || 'Automated execution';
+              const testMarkers = context.payload.inputs?.test_markers || 'all';
+              const browser = context.payload.inputs?.browser || 'chromium';
             
               const comment = `## 🎭 Test Results
-            
+
               **Run Details:**
               - 🏷️ **Test Markers**: ${testMarkers}
               - 🌐 **Browser**: ${browser}
               - 📝 **Run Note**: ${runNote}
               - 🔗 **Allure Report**: [View Report](${reportUrl})
 
-              **Workflow:** [${github.workflow}](${github.server_url}/${owner}/${repoName}/actions/runs/${github.run_id})
-
-              -> Report will be available at the link above once GitHub Pages deployment completes.`;
+            **Workflow:** [${context.workflow}](${context.serverUrl}/${owner}/${repoName}/actions/runs/${context.runId})
+            
+            > Report will be available at the link above once GitHub Pages deployment completes.`;
             
               await github.rest.issues.createComment({
                 issue_number: prNumber,
