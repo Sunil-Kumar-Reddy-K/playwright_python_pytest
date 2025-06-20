@@ -1,4 +1,6 @@
 import os
+import subprocess
+import sys
 
 import allure
 import pytest
@@ -11,56 +13,36 @@ from utils.page_manager import PageManager
 from utils.soft_assert import SoftAssert
 
 
-@pytest.fixture(scope="session")
-def playwright_instance():
-    with sync_playwright() as p:
-        yield p
+def pytest_addoption(parser):
+    parser.addoption(
+        "--browser-name",
+        action="store",
+        default="chromium",
+        help="Browser to run tests on: chromium, firefox, webkit, chrome"
+    )
 
 
-@pytest.fixture(scope="function")
-def browser(playwright_instance, request):
-    # Get browser from command line or environment
-    browser_name = request.config.getoption("--browser", default="chromium")
-    if not browser_name:
-        browser_name = os.getenv("PLAYWRIGHT_BROWSER", "chromium")
+@pytest.fixture
+def browser(playwright, request):
+    """Custom browser fixture that supports Chrome"""
+    browser_name = request.config.getoption("--browser-name")
+    headless = not request.config.getoption("--headed", default=True)
 
-    # Default to headless in CI environment
-    if os.getenv("CI"):
-        headless = True
+    if browser_name.lower() == "chrome":
+        # Launch actual Chrome
+        return playwright.chromium.launch(
+            channel="chrome",  # This launches actual Chrome
+            headless=headless
+        )
+    elif browser_name.lower() == "chromium":
+        return playwright.chromium.launch(headless=headless)
+    elif browser_name.lower() == "firefox":
+        return playwright.firefox.launch(headless=headless)
+    elif browser_name.lower() == "webkit":
+        return playwright.webkit.launch(headless=headless)
     else:
-        headless = not request.config.getoption("--headed", default=False)
-        
-    # Allow HEADLESS env var to override in non-CI environments
-    if not os.getenv("CI"):
-        headless_env = os.getenv("HEADLESS")
-        if headless_env is not None:
-            headless = headless_env.lower() == "true"
-
-    # Launch browser
-    if browser_name == "chromium":
-        browser = playwright_instance.chromium.launch(headless=headless)
-    elif browser_name == "firefox":
-        browser = playwright_instance.firefox.launch(headless=headless)
-    elif browser_name == "webkit":
-        browser = playwright_instance.webkit.launch(headless=headless)
-    else:
-        browser = playwright_instance.chromium.launch(headless=headless)
-
-    yield browser
-    browser.close()
-
-
-@pytest.fixture(scope="function")
-def page(browser):
-    page = browser.new_page()
-    yield page
-    page.close()
-
-
-@pytest.fixture(scope="function")
-def pages(page):
-    """Fixture that provides access to all page objects through PageManager"""
-    return PageManager(page)
+        # Default to chromium
+        return playwright.chromium.launch(headless=headless)
 
 
 @pytest.fixture(scope="function")
@@ -72,6 +54,12 @@ def api_client():
 def auth_token_fixture() -> str:
     """Pytest fixture wrapping token utility."""
     return get_auth_token()
+
+
+@pytest.fixture(scope="function")
+def pages(page):
+    """Fixture that provides access to all page objects through PageManager"""
+    return PageManager(page)
 
 
 @pytest.fixture(scope="function")

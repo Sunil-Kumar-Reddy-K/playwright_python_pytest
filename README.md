@@ -139,14 +139,27 @@ python rahulShettyPlaywrightBasicsFromUdemy/first.py
 $env:PWDEBUG=1; pytest playwright/test_riverside_BDI3.py::test_login_BDI3 -s
 ```
 
-#### Command to run in regular mode (Non-debug)
+## Updated Command to run even for chrome browser
 
-*Just dont add that "set PWDEBUG"*
 
-```cmd
-pytest tests/ui_tests/test_cart.py -s & allure serve allure-results
+```bash
+# Chrome (actual Chrome browser) no debug but headed 
+PWDEBUG=0 pytest tests -m ui --browser-name chrome --headed
 
-pytest tests -m all -s & allure serve allure-results
+# Chrome (actual Chrome browser) To get detailed soft assertion log 
+PWDEBUG=0 pytest tests -m ui --browser-name chrome -s
+
+# Chromium (Chrome-like) debug mode
+PWDEBUG=1 pytest tests -m ui --browser-name chromium
+
+# Firefox  with headed and video on 
+PWDEBUG=0 pytest tests -m ui --browser-name firefox --headed --video=on
+
+# WebKit (Safari engine) with both vide oand trace on
+PWDEBUG=0 pytest tests -m ui --browser-name webkit --headed  --tracing=on --video=on
+
+#Everythin + genrate report allure at the etst end
+PWDEBUG=0 pytest tests -m ui --browser-name chrome --headed --tracing=on --video=on -s; allure serve allure-results
 ```
 
 #### Debug with Allure Report

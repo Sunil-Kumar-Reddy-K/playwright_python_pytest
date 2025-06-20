@@ -11,3 +11,4 @@ reports/*
 *.html
 allure-results/
 allure-report/
+*.webm
