@@ -3,6 +3,7 @@
 A comprehensive hybrid automation framework for UI and API testing using Playwright and pytest.
 
 ## 📋 Table of Contents
+
 - [Initial Setup](#-initial-setup)
 - [Development Environment](#-development-environment)
 - [Test Execution](#-test-execution)
@@ -12,6 +13,7 @@ A comprehensive hybrid automation framework for UI and API testing using Playwri
 ## 🚀 Initial Setup
 
 ### Prerequisites
+
 - Python 3.8 or higher
 - Git
 - VS Code (recommended IDE)
@@ -53,6 +55,7 @@ A comprehensive hybrid automation framework for UI and API testing using Playwri
 ## 💻 Development Environment
 
 ### IDE Restart Workflow
+
 When restarting your IDE, always activate the virtual environment first:
 
 ```bash
@@ -60,13 +63,22 @@ When restarting your IDE, always activate the virtual environment first:
 ```
 
 ### Project Structure
+
 ```
 playwright-framework/
 ├── .venv/                          # Virtual environment
+├── allure-results/                 # Allure report
+├── pages/                          # Page object models
+├── apis/                           # API client 
 ├── tests/
 │   ├── ui_tests/                   # UI test files
 │   ├── api_tests/                  # API test files
 │   └── conftest.py                 # Pytest configuration
+├── utils/                          # Utility functions
+|   ├── config.py                   # Configuration
+|   └── report_generator.py         # Report generator
+|   └── soft_assert.py              # Soft assertion
+├── allure.properties               # Allure settings
 ├── playwright/                     # Legacy test location
 ├── rahulShettyPlaywrightBasicsFromUdemy/  # Learning examples
 ├── requirements.txt                # Python dependencies
@@ -78,16 +90,19 @@ playwright-framework/
 ### Basic Test Execution
 
 #### Run all tests
+
 ```bash
 pytest
 ```
 
 #### Run tests with browser visible (headed mode)
+
 ```bash
 pytest --headed
 ```
 
 #### Run specific test categories
+
 ```bash
 # UI tests only
 pytest -m ui
@@ -99,16 +114,19 @@ pytest -m api
 ### Specific Test Execution
 
 #### Run a specific test file
+
 ```bash
 pytest playwright/test_riverside_BDI3.py --headed
 ```
 
 #### Run a specific test method
+
 ```bash
 pytest playwright/test_riverside_BDI3.py::test_login_BDI3 --headed
 ```
 
 #### Run raw Python scripts
+
 ```bash
 python rahulShettyPlaywrightBasicsFromUdemy/first.py
 ```
@@ -116,16 +134,23 @@ python rahulShettyPlaywrightBasicsFromUdemy/first.py
 ### 🐛 Debug Mode
 
 #### PowerShell (Recommended)
+
 ```powershell
 $env:PWDEBUG=1; pytest playwright/test_riverside_BDI3.py::test_login_BDI3 -s
 ```
 
-#### Command Prompt
+#### Command to run in regular mode (Non-debug)
+
+*Just dont add that "set PWDEBUG"*
+
 ```cmd
-set PWDEBUG=1 & pytest tests/ui_tests/test_cart.py -s
+pytest tests/ui_tests/test_cart.py -s & allure serve allure-results
+
+pytest tests -m all -s & allure serve allure-results
 ```
 
 #### Debug with Allure Report
+
 ```cmd
 set PWDEBUG=1 & pytest tests/ui_tests/ -m ui -s & allure serve allure-results
 ```
@@ -133,6 +158,7 @@ set PWDEBUG=1 & pytest tests/ui_tests/ -m ui -s & allure serve allure-results
 ### 📊 Reporting Options
 
 #### Generate Allure Report
+
 ```bash
 # Run tests and generate Allure results
 pytest --alluredir=allure-results
@@ -142,11 +168,13 @@ allure serve allure-results
 ```
 
 #### HTML Report
+
 ```bash
 pytest --html=report.html --self-contained-html
 ```
 
 #### JUnit XML Report
+
 ```bash
 pytest --junitxml=report.xml
 ```
@@ -155,10 +183,10 @@ pytest --junitxml=report.xml
 
 ### Test Applications
 
-| Type | URL | Purpose |
-|------|-----|---------|
-| **UI Testing** | [Selenium Practice](https://rahulshettyacademy.com/seleniumPractise/#/) | E-commerce UI automation practice |
-| **API Testing** | [Notes API](https://practice.expandtesting.com/notes/api/api-docs/) | RESTful API testing scenarios |
+| Type            | URL                                                                     | Purpose                           |
+|-----------------|-------------------------------------------------------------------------|-----------------------------------|
+| **UI Testing**  | [Selenium Practice](https://rahulshettyacademy.com/seleniumPractise/#/) | E-commerce UI automation practice |
+| **API Testing** | [Notes API](https://practice.expandtesting.com/notes/api/api-docs/)     | RESTful API testing scenarios     |
 
 ### Useful Playwright Commands
 
@@ -183,6 +211,7 @@ pytest --timeout=60
 ### Common Issues
 
 **Virtual Environment Not Activated**
+
 ```bash
 # Symptoms: Command not found errors
 # Solution: Always activate first
@@ -190,12 +219,14 @@ pytest --timeout=60
 ```
 
 **Browser Installation Issues**
+
 ```bash
 # Reinstall browsers
 playwright install --force
 ```
 
 **Port Conflicts**
+
 ```bash
 # Kill processes using specific ports
 netstat -ano | findstr :8080
@@ -203,6 +234,7 @@ taskkill /PID <process_id> /F
 ```
 
 **Module Import Errors**
+
 ```bash
 # Reinstall dependencies
 pip install -r requirements.txt --force-reinstall

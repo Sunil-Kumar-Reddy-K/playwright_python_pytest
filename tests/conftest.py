@@ -1,8 +1,13 @@
+import os
+
 import allure
 import pytest
 from playwright.sync_api import sync_playwright
+
+from apis.authtoken_generator import get_auth_token
 from apis.notes_api import NotesApi
 from utils.config import Config
+from utils.page_manager import PageManager
 from utils.soft_assert import SoftAssert
 
 
@@ -13,8 +18,34 @@ def playwright_instance():
 
 
 @pytest.fixture(scope="function")
-def browser(playwright_instance):
-    browser = playwright_instance.chromium.launch(headless=False)
+def browser(playwright_instance, request):
+    # Get browser from command line or environment
+    browser_name = request.config.getoption("--browser", default="chromium")
+    if not browser_name:
+        browser_name = os.getenv("PLAYWRIGHT_BROWSER", "chromium")
+
+    # Default to headless in CI environment
+    if os.getenv("CI"):
+        headless = True
+    else:
+        headless = not request.config.getoption("--headed", default=False)
+        
+    # Allow HEADLESS env var to override in non-CI environments
+    if not os.getenv("CI"):
+        headless_env = os.getenv("HEADLESS")
+        if headless_env is not None:
+            headless = headless_env.lower() == "true"
+
+    # Launch browser
+    if browser_name == "chromium":
+        browser = playwright_instance.chromium.launch(headless=headless)
+    elif browser_name == "firefox":
+        browser = playwright_instance.firefox.launch(headless=headless)
+    elif browser_name == "webkit":
+        browser = playwright_instance.webkit.launch(headless=headless)
+    else:
+        browser = playwright_instance.chromium.launch(headless=headless)
+
     yield browser
     browser.close()
 
@@ -27,8 +58,20 @@ def page(browser):
 
 
 @pytest.fixture(scope="function")
+def pages(page):
+    """Fixture that provides access to all page objects through PageManager"""
+    return PageManager(page)
+
+
+@pytest.fixture(scope="function")
 def api_client():
     return NotesApi(Config.API_BASE_URL)
+
+
+@pytest.fixture(scope="session", name="get_token")
+def auth_token_fixture() -> str:
+    """Pytest fixture wrapping token utility."""
+    return get_auth_token()
 
 
 @pytest.fixture(scope="function")
