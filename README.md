@@ -141,7 +141,6 @@ $env:PWDEBUG=1; pytest playwright/test_riverside_BDI3.py::test_login_BDI3 -s
 
 ## Updated Command to run even for chrome browser
 
-
 ```bash
 # Chrome (actual Chrome browser) no debug but headed 
 PWDEBUG=0 pytest tests -m ui --browser-name chrome --headed
@@ -160,6 +159,10 @@ PWDEBUG=0 pytest tests -m ui --browser-name webkit --headed  --tracing=on --vide
 
 #Everythin + genrate report allure at the etst end
 PWDEBUG=0 pytest tests -m ui --browser-name chrome --headed --tracing=on --video=on -s; allure serve allure-results
+
+#Dealing with environments of individual UI or API (since the APID and UI urls are unique of it own just defining env is enough)
+PWDEBUG=0 pytest tests -m ui --env qa --browser-name chrome --headed --tracing=on --video=on -s; allure serve allure-results
+
 ```
 
 #### Debug with Allure Report

@@ -13,14 +13,15 @@ email: str
 password: str = "Test@100"
 token: str
 
-@pytest.mark.api
-@pytest.mark.all
+
+@pytest.mark.api_tests
+@pytest.mark.all_tests
 @pytest.mark.usefixtures("get_token")
 def test_create_notes(get_token: str) -> None:
     url: str = f"{BASE_URL}/notes"
 
     # token = get_token # Use the token from the fixture
-    token = get_auth_token() # Use the token from the function directly
+    token = get_auth_token()  # Use the token from the function directly
 
     headers: Dict[str, str] = {
         "Content-Type": "application/json",
