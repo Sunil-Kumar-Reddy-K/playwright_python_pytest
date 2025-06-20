@@ -3,11 +3,12 @@ import random
 import pytest
 import requests
 from typing import Dict, Any
+from utils.config import config
 
 from requests import Response
 
 # Base URL used across all API requests
-BASE_URL: str = "https://practice.expandtesting.com/notes/api"
+BASE_URL: str = config.api_base_url
 
 # Global variables
 name: str
@@ -15,8 +16,9 @@ email: str
 password: str = "Test@100"
 token: str
 
-@pytest.mark.api
-@pytest.mark.all
+
+@pytest.mark.api_tests
+@pytest.mark.all_tests
 def test_notes_api_health_check() -> None:
     url: str = f"{BASE_URL}"
 
@@ -35,8 +37,9 @@ def test_notes_api_health_check() -> None:
     assert json_data["status"] == 200
     assert json_data["message"] == "Notes API is Running"
 
-@pytest.mark.api
-@pytest.mark.all
+
+@pytest.mark.api_tests
+@pytest.mark.all_tests
 def test_new_user_registration() -> None:
     url: str = f"{BASE_URL}/users/register"
 
@@ -71,8 +74,9 @@ def test_new_user_registration() -> None:
     else:
         raise Exception("User account not created")
 
-@pytest.mark.api
-@pytest.mark.all
+
+@pytest.mark.api_tests
+@pytest.mark.all_tests
 def test_user_login() -> None:
     url: str = f"{BASE_URL}/users/login"
 

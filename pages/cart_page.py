@@ -1,11 +1,11 @@
 from playwright.sync_api import Page
-from utils.config import Config
+from utils.config import config
 
 
 class CartPage:
     def __init__(self, page: Page):
         self.page = page
-        self.url = Config.UI_BASE_URL
+        self.url = config.ui_base_url
         self.add_to_cart_btn = page.locator("text=ADD TO CART").first
         self.cart_icon = page.locator(".cart-icon")
 

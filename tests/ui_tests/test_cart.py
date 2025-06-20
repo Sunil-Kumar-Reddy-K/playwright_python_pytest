@@ -6,9 +6,10 @@ from pages.cart_page import CartPage
 @allure.epic("E-Commerce Application")
 @allure.feature("Shopping Cart")
 @allure.story("Add Items to Cart")
+@allure.title("Verify user can add items to cart - {config.current_env}")
 @allure.severity(allure.severity_level.CRITICAL)
-@pytest.mark.ui
-@pytest.mark.all
+@pytest.mark.ui_tests
+@pytest.mark.all_tests
 def test_add_item_to_cart(pages, soft_assert, page: CartPage):
     pages.cart_page.navigate()
     pages.cart_page.add_item_to_cart()
@@ -19,7 +20,6 @@ def test_add_item_to_cart(pages, soft_assert, page: CartPage):
     print("The page url is ", page.url)
 
     soft_assert.assert_all()
-
 
 # @allure.title("Test adding item to cart")
 # @allure.description("This test verifies that user can add an item to the shopping cart")
