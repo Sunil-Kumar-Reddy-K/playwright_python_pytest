@@ -1,0 +1,7 @@
+"Status","Start Time","Stop Time","Duration in ms","Parent Suite","Suite","Sub Suite","Test Class","Test Method","Name","Description"
+"passed","Sat Jun 21 06:18:47 GMT 2025","Sat Jun 21 06:18:51 GMT 2025","4650","tests.ui_tests","test_cart","","","","Verify user can add items to cart 2 - {config.current_env}",""
+"passed","Sat Jun 21 06:18:37 GMT 2025","Sat Jun 21 06:18:38 GMT 2025","444","tests.api_tests","test_notes","","","","test_notes_api_health_check",""
+"passed","Sat Jun 21 06:18:39 GMT 2025","Sat Jun 21 06:18:39 GMT 2025","488","tests.api_tests","test_notes_2","","","","test_create_notes",""
+"passed","Sat Jun 21 06:18:38 GMT 2025","Sat Jun 21 06:18:38 GMT 2025","292","tests.api_tests","test_notes","","","","test_user_login",""
+"passed","Sat Jun 21 06:18:38 GMT 2025","Sat Jun 21 06:18:38 GMT 2025","356","tests.api_tests","test_notes","","","","test_new_user_registration",""
+"passed","Sat Jun 21 06:18:41 GMT 2025","Sat Jun 21 06:18:46 GMT 2025","5026","tests.ui_tests","test_cart","","","","Verify user can add items to cart - {config.current_env}",""

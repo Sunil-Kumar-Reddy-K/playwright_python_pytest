@@ -1,0 +1,1 @@
+New user Registration Response:  {'success': True, 'status': 201, 'message': 'User account created successfully', 'data': {'id': '68564ebea3d54b0289d9817b', 'name': 'ATP_test', 'email': 'atp_test9323@gmail.com'}}

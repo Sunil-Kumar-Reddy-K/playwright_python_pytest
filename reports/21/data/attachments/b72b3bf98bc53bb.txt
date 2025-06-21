@@ -1,0 +1,1 @@
+Noted Created Response:  {'success': True, 'status': 200, 'message': 'Note successfully created', 'data': {'id': '68564ebfa3d54b0289d98187', 'title': 'Sample title trial', 'description': 'Sample description trial', 'category': 'Work', 'completed': False, 'created_at': '2025-06-21T06:18:39.646Z', 'updated_at': '2025-06-21T06:18:39.646Z', 'user_id': '683917de8ada340286616e1e'}}
