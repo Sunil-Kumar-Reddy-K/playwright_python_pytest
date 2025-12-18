@@ -259,7 +259,7 @@ jobs:
           java-version: '11'
 
       - name: 📊 Generate Allure Report
-        uses: simple-elf/allure-report-action@v2
+        uses: simple-elf/allure-report-action@master
         with:
           allure_results: allure-results
           allure_report: allure-report
