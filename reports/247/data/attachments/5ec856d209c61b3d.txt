@@ -1,0 +1,7 @@
+
+🔧 Test Configuration:
+   Environment: QA
+   Test Type: UI
+   UI Base URL: https://rahulshettyacademy.com/seleniumPractise/
+   API Base URL: https://practice.expandtesting.com/notes/api
+   Timeout: 30000ms
