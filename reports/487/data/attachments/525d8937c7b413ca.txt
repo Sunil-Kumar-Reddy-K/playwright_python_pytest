@@ -1,0 +1,1 @@
+New user Registration Response:  {'success': False, 'status': 409, 'message': 'An account already exists with the same email address'}

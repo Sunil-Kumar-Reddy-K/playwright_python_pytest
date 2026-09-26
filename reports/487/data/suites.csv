@@ -1,0 +1,7 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","4854","Verify user can add items to cart - {config.current_env}","tests.ui_tests","2026-09-26","passed","2026-09-26","","test_cart","",""
+"","447","test_notes_api_health_check","tests.api_tests","2026-09-26","passed","2026-09-26","","test_notes","",""
+"","362","test_create_notes","tests.api_tests","2026-09-26","failed","2026-09-26","","test_notes_2","",""
+"","0","test_user_login","tests.api_tests","2026-09-26","broken","2026-09-26","","test_notes","",""
+"","4872","Verify user can add items to cart 2 - {config.current_env}","tests.ui_tests","2026-09-26","passed","2026-09-26","","test_cart","",""
+"","150","test_new_user_registration","tests.api_tests","2026-09-26","failed","2026-09-26","","test_notes","",""
