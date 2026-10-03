@@ -1,0 +1,2 @@
+User Login Response:  {'success': True, 'status': 200, 'message': 'Login successful', 'data': {'id': '6ac0de652d85510296027c95', 'name': 'ATP_test', 'email': 'atp_test6883@gmail.com', 'token': '0073bcd2e79e4f3ca8851d2ce860cf1ffae2037ec50141c3be20ae8a81daec56'}}
+User Login Response:  {'success': True, 'status': 200, 'message': 'Login successful', 'data': {'id': '6ac0de652d85510296027c95', 'name': 'ATP_test', 'email': 'atp_test6883@gmail.com', 'token': '0073bcd2e79e4f3ca8851d2ce860cf1ffae2037ec50141c3be20ae8a81daec56'}}
