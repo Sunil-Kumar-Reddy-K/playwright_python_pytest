@@ -1,0 +1,8 @@
+✓ PASS: Failed to navigate to cart page
+The page url is  https://rahulshettyacademy.com/seleniumPractise/#/cart
+
+--- Soft Assertion Summary ---
+Passed: 1
+Failed: 0
+Total: 1
+✓ All soft assertions passed!
